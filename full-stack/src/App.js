@@ -1,11 +1,13 @@
 import { useMemo, useContext, useEffect } from "react";
-import { Context } from "./context";
+import { Context } from "./context/FirestoreContext";
+import { useAuthContext } from "./context/AuthContext";
 import Card from "./components/Card";
 import Layout from "./components/Layout";
 import "./App.css";
-// test
+
 function App() {
   const { state, read } = useContext(Context);
+  const { authenticate } = useAuthContext();
   const count = useMemo(() => {
     return `you have ${state.items.length} image${
       state.items.length > 1 ? "s" : ""
@@ -14,7 +16,8 @@ function App() {
 
   useEffect(() => {
     read();
-  });
+    authenticate();
+  }, [read, authenticate]);
 
   return (
     <Layout>

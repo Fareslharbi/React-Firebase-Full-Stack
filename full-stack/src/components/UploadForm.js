@@ -1,10 +1,12 @@
 import { useMemo, useContext } from "react";
-import { Context } from "../context";
-import Firestore from "../handler/firestore";
-import Storage from "../handler/storage";
+import { Context } from "../context/FirestoreContext";
+import { useAuthContext } from "../context/AuthContext";
+import Firestore from "../handlers/firestore";
+import Storage from "../handlers/storage";
 
 const { writeDoc } = Firestore;
 const { uploadFile, downloadFile } = Storage;
+
 const Preview = () => {
   const { state } = useContext(Context);
   const {
@@ -26,17 +28,24 @@ const Preview = () => {
 };
 
 const UploadForm = () => {
-  const { dispatch, state } = useContext(Context);
+  const { dispatch, state, read } = useContext(Context);
+  const { currentUser } = useAuthContext();
   const { isCollapsed: isVisible, inputs } = state; // destructuring the current state
+
   const handleOnChange = (e) =>
     dispatch({ type: "setInputs", payload: { value: e } });
+
+  const username = currentUser?.displayName.split(" ").join("");
   const handleOnSubmit = (e) => {
     e.preventDefault();
     uploadFile(state.inputs)
       .then(downloadFile)
       .then((url) => {
-        writeDoc({ ...inputs, path: url }, "stocks").then(() => {
-          dispatch({ type: "setItem" });
+        writeDoc(
+          { ...inputs, path: url, user: username.toLowerCase() },
+          "stocks"
+        ).then(() => {
+          read();
           dispatch({ type: "collapse", payload: { bool: false } });
         });
       });
