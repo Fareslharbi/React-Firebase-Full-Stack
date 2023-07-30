@@ -122,5 +122,3 @@ If you want to contribute to this project, feel free to open a pull request. Any
 This project is licensed under the [MIT License](LICENSE).
 
 ---
-
-Feel free to customize this `README.md` to provide more specific instructions or details about your full-stack React Firebase project with Context API state management. Happy coding!
