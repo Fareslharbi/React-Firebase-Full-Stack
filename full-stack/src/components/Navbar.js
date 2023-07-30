@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-
+import { useFirestoreContext } from "../context/FirestoreContext";
 const LogIn = () => {
   const { login, currentUser } = useAuthContext();
   return (
@@ -24,15 +25,72 @@ const LogOut = () => {
 };
 
 function Navigation() {
+  const { currentUser } = useAuthContext();
+  const { pathName } = useLocation();
   return (
     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
       {/* remove all links except HOME */}
       <li className="nav-item">
-        <a className="nav-link active" aria-current="page" href="#1">
+        <Link
+          className={`nav-link ${pathName === "/" ? "active" : ""}`}
+          aria-current="page"
+          to="/"
+        >
           Home
-        </a>
+        </Link>
       </li>
+      {currentUser && (
+        <li className="nav-item">
+          <Link
+            className={`nav-link ${
+              pathName === "/stockimages" ? "active" : ""
+            }`}
+            aria-current="page"
+            to="/stockimages"
+          >
+            My Stock Images
+          </Link>
+        </li>
+      )}
+      {currentUser && (
+        <li className="nav-item">
+          <Link
+            className={`nav-link ${pathName === "/profile" ? "active" : ""}`}
+            aria-current="page"
+            to="/profile"
+          >
+            Profile
+          </Link>
+        </li>
+      )}
     </ul>
+  );
+}
+
+function SearchForm() {
+  const [text, search] = useState(null);
+  const { filterItems: filter } = useFirestoreContext();
+  const handleOnChange = (e) => {
+    search(e.target.value);
+    filter(e.target.value);
+  };
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+    filter(text);
+  };
+  return (
+    <form className="d-flex" onSubmit={handleOnSubmit}>
+      <input
+        onChange={handleOnChange}
+        className="form-control me-2"
+        type="search"
+        placeholder="Search"
+        aria-label="Search"
+      />
+      <button className="btn btn-outline-success" type="submit">
+        Search
+      </button>
+    </form>
   );
 }
 
@@ -56,9 +114,10 @@ function Dropdown() {
       "Login"
     );
   }, [currentUser]);
-
   return (
     <ul className="navbar-nav mb-2 mb-lg-0">
+      {" "}
+      {/* remove ms-auto */}
       <li className="nav-item dropdown">
         <a
           className="nav-link dropdown-toggle"
@@ -71,9 +130,14 @@ function Dropdown() {
           {avatar}
         </a>
         <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-          <li className="text-center">{username}</li>
-          <hr className="dropdown-divider" />{" "}
-          {/* Changed 'divider' to 'dropdown-divider' */}
+          <li>
+            {currentUser && (
+              <Link className="dropdown-item text-center" to="profile">
+                {username}
+              </Link>
+            )}
+            <hr className="dropdown divider" />
+          </li>
           <div className="d-flex justify-content-center">
             <LogIn />
             <LogOut />
@@ -88,9 +152,9 @@ function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light mb-5">
       <div className="container-fluid">
-        <a className="navbar-brand" href="#1">
+        <Link className="navbar-brand" to="/">
           ⚡ Firestock
-        </a>
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -111,21 +175,4 @@ function Navbar() {
     </nav>
   );
 }
-
-function SearchForm() {
-  return (
-    <form className="d-flex">
-      <input
-        className="form-control me-2"
-        type="search"
-        placeholder="Search"
-        aria-label="Search"
-      />
-      <button className="btn btn-outline-success" type="submit">
-        Search
-      </button>
-    </form>
-  );
-}
-
 export default Navbar;
